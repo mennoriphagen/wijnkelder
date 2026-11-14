@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wijnkoelkast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--room:#1c1514;--card:#251c1a;--line:#3a2d28;--brass:#c3a15f;--text:#efe6d6;--mute:#a39583}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse 90% 60% at 30% 0%,#3a2619,var(--room) 70%);color:var(--text);font:15px/1.55 'DM Sans',system-ui,sans-serif}
+h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;margin:0;line-height:1.1}
+header{max-width:1120px;margin:auto;padding:28px 28px 0;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+header h1{font-size:40px;color:var(--brass)}
+header span{color:var(--mute)}
+main{max-width:1120px;margin:auto;padding:20px 28px 48px;display:grid;grid-template-columns:minmax(300px,540px) 1fr;gap:36px;align-items:start}
+@media(max-width:820px){main{grid-template-columns:1fr;padding:16px}header{padding:20px 16px 0}}
+svg{width:100%;height:auto;display:block;filter:drop-shadow(0 24px 40px rgba(0,0,0,.7))}
+.slot{cursor:pointer;outline:none}
+.slot .in{transition:transform .18s ease}
+.slot:hover .in{transform:translateY(-3px)}
+.ring{opacity:0;transition:opacity .15s}
+.slot.sel .ring,.slot:focus-visible .ring{opacity:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;min-height:440px}
+.card h2{font-size:36px}
+.sub{color:var(--mute);margin:6px 0 14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.chip{border:1px solid var(--line);border-radius:99px;padding:2px 12px;font-size:13px}
+.chip.ok{border-color:var(--brass);color:var(--brass)}
+.chip.old{border-color:#b9544f;color:#e08a84}
+.chip.wait{border-color:#6f8aa8;color:#9db6d1}
+.card h3{font-size:23px;margin:24px 0 10px;color:var(--brass)}
+.bar{display:grid;grid-template-columns:84px 1fr;align-items:center;gap:12px;margin:8px 0;color:var(--mute)}
+.bar i{display:block;height:6px;border-radius:3px;background:#3a2d28;position:relative;overflow:hidden}
+.bar b{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#8a6a33,#e2c07c)}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 24px;margin:0}
+.facts dt{color:var(--mute);font-size:13px}
+.facts dd{margin:0;font-size:18px}
+.note{color:var(--mute);font-size:13px;margin-top:24px}
+.slot .in{transition:transform .18s ease,opacity .2s}
+.slot.dim .in{opacity:.22}
+.pick{opacity:0;transition:opacity .2s}
+.slot.hit .pick{opacity:1;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{stroke-opacity:.45}}
+@media(prefers-reduced-motion:reduce){.slot.hit .pick{animation:none}}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:-8px 0 22px}
+.tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--mute);font:500 15px 'DM Sans',system-ui,sans-serif;padding:8px 14px;cursor:pointer;margin-bottom:-1px}
+.tab[aria-selected=true]{color:var(--brass);border-bottom-color:var(--brass)}
+.tab:focus-visible,.fchip:focus-visible,.btn:focus-visible,.ri:focus-visible,.inp:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.inp{flex:1;width:100%;background:#1a1311;border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;padding:11px 14px;margin:8px 0 14px}
+.grp{margin:10px 0}
+.grp>span{display:block;color:var(--mute);font-size:13px;margin-bottom:6px}
+.chs{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{background:none;border:1px solid var(--line);border-radius:99px;color:var(--text);font:inherit;font-size:13px;padding:3px 12px;cursor:pointer}
+.fchip[aria-pressed=true]{border-color:var(--brass);color:var(--brass);background:#2e2318}
+.cnt{color:var(--mute);font-size:13px;margin:18px 0 6px}
+.res{list-style:none;margin:0;padding:0}
+.ri,.sg{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);color:var(--text);font:inherit;padding:10px 4px}
+.ri{cursor:pointer}
+.ri:hover{background:#2c2220}
+.ri i,.sg i{width:12px;height:12px;border-radius:50%;flex:none;border:1px solid #0006}
+.ri span,.sg span{flex:1}
+.ri b,.sg b{display:block;font-weight:500}
+.ri small,.sg small{display:block;color:var(--mute)}
+.sg small.why{color:var(--brass)}
+.ri em{font-style:normal}
+.eatf{display:flex;gap:10px;align-items:flex-start}
+.btn{background:var(--brass);color:#1c1514;border:0;border-radius:10px;font:500 15px 'DM Sans',system-ui,sans-serif;padding:0 18px;height:44px;margin-top:8px;cursor:pointer}
+.none{color:var(--mute);padding:12px 4px;list-style:none}
+.btn.sm{height:34px;padding:0 14px;font-size:14px;margin-top:0}
+.btn.ghost{background:none;color:var(--text);border:1px solid var(--line)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+dialog{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:26px;max-width:500px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+dialog label{display:block;color:var(--mute);font-size:13px;margin-top:8px}
+#msg{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#3a1018;color:var(--text);border:1px solid var(--brass);border-radius:10px;padding:10px 16px;max-width:90%;z-index:10;display:none}
+header>div{display:flex;align-items:center;gap:12px;color:var(--mute)}
+.fm{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.fm label{display:block;color:var(--mute);font-size:13px}
+.fm .wide{grid-column:1/-1}
+select.inp{appearance:auto}
+.els{margin-top:20px;min-height:0;padding:18px 22px}
+.els h3{margin:0 0 6px}
+.el{display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--line);border-radius:99px;color:var(--text);font:inherit;font-size:13px;padding:3px 12px;cursor:pointer}
+.el i{width:10px;height:10px;border-radius:50%;border:1px solid #0006}
+.el.sel{border-color:var(--brass)}
+.el.hit{border-color:#f0cf8a;box-shadow:0 0 0 2px #f0cf8a}
+.el.dim{opacity:.3}
+</style>
+</head>
+<body>
+<header><h1>Wijnkoelkast</h1><div><span id="count"></span> <button class="btn sm ghost" id="cfg">Instellingen</button></div></header>
+<main>
+  <div id="wrap"></div>
+  <section class="card">
+    <div class="tabs" role="tablist" aria-label="Weergave">
+      <button class="tab" role="tab" data-t="fles">Fles</button>
+      <button class="tab" role="tab" data-t="zoek">Zoeken</button>
+      <button class="tab" role="tab" data-t="eten">Wat eten we?</button>
+      <button class="tab" role="tab" data-t="nieuw">Toevoegen</button>
+    </div>
+    <div id="panel" aria-live="polite"></div>
+  </section>
+</main>
+<dialog id="dlg"><form method="dialog">
+<h2>Verbinding met je sheet</h2>
+<p class="sub">Plak de web-app-URL van je Apps Script en vul je wachtwoord in. Beide blijven alleen op dit apparaat staan. Zonder wachtwoord probeert de app de meekijkmodus, en anders de voorbeeldflessen.</p>
+<label>Web-app-URL<input class="inp" id="cu" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
+<label>Wachtwoord<input class="inp" id="ck" type="password" autocomplete="current-password"></label>
+<div class="eatf"><button class="btn" value="ok">Opslaan en laden</button><button class="btn ghost" value="wis">Wissen</button><button class="btn ghost" value="x">Sluiten</button></div>
+</form></dialog>
+<div id="msg" role="status"></div>
+<script>
+const API_URL=''; // optioneel: vaste web-app-URL (let op: staat dan zichtbaar in de code)
+const TY={
+  rood:{g:'#3a1018',f:'#7a1626',n:'Rode wijn'},
+  wit:{g:'#5f6c3c',f:'#d8c98a',n:'Witte wijn'},
+  rose:{g:'#8c5a58',f:'#d98f84',n:'Rosé'},
+  bruis:{g:'#26301f',f:'#c8a24e',n:'Bruisend'},
+  bier:{g:'#4b2b12',f:'#b7862f',n:'Bier'}
+};
+const LOC={s1:'Warme zone (17 °C), plank 1',s2:'Warme zone (17 °C), plank 2',s3:'Koude zone (10 °C), plank 3',s4:'Koude zone (10 °C), plank 4',bot:'Koude zone (10 °C), bodemruimte'};
+const ROWS={s1:{cy:158,bar:186,n:7},s2:{cy:254,bar:282,n:7},s3:{cy:382,bar:410,n:7},s4:{cy:478,bar:506,n:7},bot:{n:10}};
+const TASTE=['Zoet','Zuur','Body','Tannine','Fruit'];
+const B=(r,p,t,name,prod,year,taste,pair,price,bought,from,to,size)=>({r,p,t,name,prod,year,taste,pair,price,bought,from,to,size});
+const DEMO=[
+ B('s1',0,'rood','Barolo','Cantina Esempio',2018,[1,4,5,5,3],'Wildstoof, truffelpasta, gerijpte kaas',52,'2023-03-12',2026,2036),
+ B('s1',1,'rood','Rioja Reserva','Bodega Ejemplo',2016,[1,3,4,3,3],'Lamsbout, chorizo, manchego',24,'2022-11-05',2022,2027),
+ B('s1',2,'rood','Châteauneuf-du-Pape','Domaine Modèle',2019,[1,3,5,4,4],'Gebraden eend, stoofpot, kruidige worst',38,'2024-01-20',2025,2034),
+ B('s1',3,'rood','Chianti Classico Riserva','Fattoria Prova',2017,[1,4,3,4,3],'Pasta met ragù, pizza, parmezaan',21,'2023-06-02',2023,2028),
+ B('s1',4,'rood','Bourgogne Pinot Noir','Maison Exemple',2021,[1,4,2,2,4],'Zalm, kip, paddenstoelen',29,'2024-09-14',2024,2029),
+ B('s1',5,'rood','Crozes-Hermitage','Domaine Test',2020,[1,3,4,4,4],'Gegrild vlees, bbq, zwarte peper',19,'2024-04-30',2025,2031),
+ ...[0,1].map(p=>({...B('s2',p,'rood','Cuvée Niels','Domaine de Marotte',2022,[1,3,4,3,4],'Franse, Italiaanse en Spaanse gerechten, bbq en harde kaas; licht gekoeld ook bij Hollandse gerechten',null,null,2025,2028),grapes:'Grenache noir, Syrah, Mourvèdre, Carignan',region:'Ventoux AOP, Rhônevallei (Frankrijk)',abv:13.5,real:true,tip:'Laat de wijn eerst ademen'})),
+ B('s2',3,'rood','Saint-Émilion Grand Cru','Château Exemple',2015,[1,3,4,4,3],'Gebraden rund, wildpaté, oude kaas',45,'2021-12-11',2022,2026),
+ B('s2',4,'rood','Primitivo di Manduria','Tenuta Prova',2020,[2,2,5,3,5],'Pasta arrabbiata, spareribs, gegrilde groente',14,'2025-05-17',2024,2028),
+ B('s3',0,'wit','Chablis Premier Cru','Domaine Exemple',2021,[1,5,3,0,3],'Oesters, gebakken vis, geitenkaas',34,'2024-03-09',2024,2030),
+ B('s3',1,'rose','Côtes de Provence Rosé','Mas Modèle',2025,[1,4,2,0,5],'Salade niçoise, gegrilde garnalen, tapas',12,'2026-06-14',2026,2027),
+ B('s3',2,'wit','Riesling Kabinett','Weingut Beispiel',2022,[3,5,2,0,4],'Thaise curry, sushi, zachte kazen',17,'2024-08-25',2024,2032),
+ B('s3',4,'wit','Sauvignon Blanc','Domaine du Test',2025,[1,5,2,0,4],'Geitenkaas, asperges, ceviche',13,'2026-04-03',2026,2028),
+ B('s3',5,'wit','Albariño','Bodega Prueba',2025,[1,4,2,0,4],'Schaaldieren, paella, gegrilde vis',15,'2026-05-22',2026,2028),
+ B('s4',1,'wit','Meursault','Domaine Exemple',2020,[1,3,4,0,3],'Kreeft, kip in roomsaus, gerookte vis',58,'2023-11-18',2024,2030),
+ B('s4',2,'bier','Tripel','Brouwerij Voorbeeld',null,[2,2,4,0,3],'Kaasplank, gebakken kip, pittige gerechten',3.2,'2026-09-05',2026,2028),
+ B('s4',5,'wit','Pinot Grigio','Tenuta Esempio',2025,[1,3,2,0,3],'Antipasti, risotto, lichte visgerechten',11,'2026-07-12',2026,2027),
+ B('bot',0,'bruis','Champagne Brut','Maison Modèle',null,[1,4,3,0,3],'Aperitief, oesters, gefrituurde hapjes',46,'2025-12-20',2025,2030,'dik'),
+ B('bot',1,'bruis','Rosé Champagne','Maison Exemple',null,[1,4,3,0,4],'Aperitief, zalm, aardbeien',54,'2026-02-14',2026,2030,'dik'),
+ B('bot',2,'wit','Verdejo','Bodega Muestra',2025,[1,4,2,0,4],'Salades, gegrilde groente, tapas',10,'2026-08-01',2026,2027),
+ B('bot',3,'wit','Vermentino','Tenuta Test',2025,[1,4,2,0,3],'Visgerechten, pesto, vers fruit',12,'2026-08-01',2026,2027),
+ B('bot',4,'bruis','Prosecco Superiore','Cantina Prova',null,[2,4,2,0,3],'Aperitief, vers fruit, lichte hapjes',13,'2026-10-02',2026,2027,'dik'),
+ B('bot',5,'rood','Sangiovese','Podere Esempio',2022,[1,3,3,3,4],'Pizza, pasta met tomaat, gegrilde kip',9,'2026-03-28',2025,2028)
+];
+DEMO.forEach((b,i)=>b.nummer=i+1);
+let DATA=DEMO,BY={};
+const reindex=()=>{BY={};DATA.forEach(b=>BY[key(b)]=b);};
+const Y=new Date().getFullYear();
+const status=b=>{if(!b.from&&!b.to)return['Geen drinkvenster',''];const f=b.from||0,t=b.to||9999;return Y<f?['Nog bewaren','wait']:Y>t?['Over de top','old']:Y===t?['Nu drinken, bijna op','ok']:['Nu drinken','ok'];};
+const eur=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(n);
+const dat=d=>new Date(d+'T00:00:00').toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'});
+
+function glass(b,R,foot){
+  const t=TY[b.t];
+  if(foot) return `<circle r="${R}" fill="${t.g}"/><circle r="${R-5}" fill="none" stroke="#fff" stroke-opacity=".12"/><circle r="${R*.42}" fill="#000" opacity=".55"/><circle r="${R}" fill="url(#gl)"/>`;
+  return `<circle cy="2" r="${R*.92}" fill="${t.g}"/><circle cy="-1" r="${R*.42}" fill="${t.f}"/><circle cx="${-R*.12}" cy="${-R*.14}" r="${R*.12}" fill="#fff" opacity=".45"/><circle r="${R}" fill="url(#gl)"/>`;
+}
+function slot(k,x,y,R,b,foot){
+  const label=b?`${b.name}, ${loc(b)}`:`Lege plek, ${LOC[k.split('-')[0]]}`;
+  const body=b?glass(b,R,foot):`<circle r="${R*.5}" fill="none" stroke="#fff" stroke-opacity=".16" stroke-dasharray="3 4"/>`;
+  return `<g transform="translate(${x.toFixed(1)},${y})" class="slot" data-k="${k}" tabindex="0" role="button" aria-label="${label}"><g class="in">${body}<circle class="ring" r="${R+5}" fill="none" stroke="#c3a15f" stroke-width="2.5"/><circle class="pick" r="${k.startsWith('bot')?R+3:R+8}" fill="none" stroke="#f0cf8a" stroke-width="3"/></g><circle r="${R+4}" fill="transparent"/></g>`;
+}
+function build(){
+  let s=`<svg viewBox="0 0 600 680" role="img" aria-label="Wijnkoelkast met twee zones"><defs>
+<linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ecd2a8"/><stop offset="1" stop-color="#c49a66"/></linearGradient>
+<linearGradient id="cav" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0908"/><stop offset="1" stop-color="#171311"/></linearGradient>
+<linearGradient id="cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe6b5" stop-opacity=".3"/><stop offset="1" stop-color="#ffe6b5" stop-opacity="0"/></linearGradient>
+<radialGradient id="gl" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<radialGradient id="halo"><stop offset="0" stop-color="#ffe6b5" stop-opacity=".4"/><stop offset="1" stop-color="#ffe6b5" stop-opacity="0"/></radialGradient>
+<clipPath id="cavclip"><rect x="40" y="100" width="520" height="500" rx="8"/></clipPath>
+<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+<rect x="8" y="8" width="584" height="664" rx="24" fill="#161413" stroke="#2c2724" stroke-width="2"/>
+<rect x="40" y="30" width="520" height="54" rx="10" fill="#0b0a0a" stroke="#2a2522"/>
+<text x="60" y="64" font-family="Cormorant Garamond,Georgia,serif" font-size="20" fill="#c3a15f">Duo</text>
+<rect x="240" y="42" width="120" height="34" rx="4" fill="#07090b" stroke="#333"/>
+<text x="270" y="68" font-family="Courier New,monospace" font-size="26" fill="#dfe9f5" text-anchor="middle">17</text>
+<text x="330" y="68" font-family="Courier New,monospace" font-size="26" fill="#dfe9f5" text-anchor="middle">10</text>
+<text x="270" y="39" font-size="9" fill="#8a8a8a" text-anchor="middle">boven</text><text x="330" y="39" font-size="9" fill="#8a8a8a" text-anchor="middle">onder</text>
+<rect x="40" y="100" width="520" height="500" rx="8" fill="url(#cav)" stroke="#2a2522"/>
+
+<rect x="40" y="318" width="520" height="18" fill="#0a0908"/>
+<text x="56" y="331" font-size="11" fill="#a39583">Warme zone, 17 °C</text><text x="544" y="331" font-size="11" fill="#a39583" text-anchor="end">Koude zone, 10 °C</text>
+<rect x="44" y="592" width="512" height="6" fill="#1d1916"/>`;
+  [70,640-18].forEach(()=>{});
+  for(const y of [622,638,654]) s+=`<rect x="70" y="${y}" width="200" height="6" fill="#0d0c0b" stroke="#242020"/><rect x="330" y="${y}" width="200" height="6" fill="#0d0c0b" stroke="#242020"/>`;
+  for(const r of ['s1','s2','s3','s4']){
+    const o=ROWS[r];
+    s+='<g clip-path="url(#cavclip)">';
+    for(const x of [50,550]) s+=`<ellipse cx="${x}" cy="${o.cy}" rx="46" ry="62" fill="url(#halo)"/><ellipse cx="${x}" cy="${o.cy}" rx="8" ry="15" fill="#1a1613"/><ellipse cx="${x}" cy="${o.cy}" rx="6" ry="12.5" fill="#fff1cf" filter="url(#glow)"/><ellipse cx="${x}" cy="${o.cy}" rx="4.6" ry="11" fill="#fff8e6"/>`;
+    s+='</g>';
+    s+=`<rect x="52" y="${o.bar+16}" width="496" height="6" fill="#000" opacity=".45"/><rect x="52" y="${o.bar}" width="496" height="16" rx="3" fill="url(#wood)"/>`;
+    for(let i=0;i<o.n;i++){const k=r+'-'+i;s+=slot(k,60+480/7*(i+.5),o.cy,24,BY[k],i%2===0);}
+  }
+  for(let i=0;i<10;i++){const k='bot-'+i,b=BY[k],R=b&&b.size==='dik'?21:18;s+=slot(k,60+48*(i+.5),592-R-3,R,b,false);}
+  return s+'</svg>';
+}
+function extra(b){return [['Druiven',b.grapes],['Herkomst',b.region],['Alcohol',b.abv?String(b.abv).replace('.',',')+' %':null]].filter(x=>x[1]).map(x=>`<div><dt>${x[0]}</dt><dd>${x[1]}</dd></div>`).join('');}
+function bars(b){return TASTE.map((n,i)=>`<div class="bar"><span>${n}</span><i><b style="width:${b.taste[i]*20}%"></b></i></div>`).join('');}
+function panel(k){
+  const b=BY[k],r=k.split('-')[0],pos=+k.split('-')[1]+1,el=document.getElementById('panel');
+  if(!b){el.innerHTML=`<h2>Lege plek</h2><p class="sub">${LOC[r]}, plek ${pos}</p><p>Hier past nog een fles.</p>${MODE==='live'?'<div class="acts"><button class="btn sm" data-a="add">Fles hier toevoegen</button></div>':'<p class="note">Voor toevoegen en verplaatsen heb je een verbinding met je sheet nodig (Instellingen).</p>'}`;return;}
+  const [st,cl]=status(b);
+  el.innerHTML=`<h2>${b.name}</h2><p class="sub">${b.prod}, ${b.year||'zonder jaartal'}</p>
+<div class="chips"><span class="chip">${TY[b.t].n}</span><span class="chip">${b.r==='x'?esc(b.plaats):LOC[r]+', plek '+pos}</span><span class="chip ${cl}">${st}</span></div>
+<h3>Smaakprofiel</h3>${bars(b)}
+<h3>Lekker bij</h3><p style="margin:0">${b.pair}${b.tip?'. '+b.tip+'.':''}</p>
+<h3>Gegevens</h3><dl class="facts"><div><dt>Aankoopprijs</dt><dd>${b.price==null?'Nog niet ingevuld':eur(b.price)}</dd></div><div><dt>Aankoopdatum</dt><dd>${b.bought?dat(b.bought):'Nog niet ingevuld'}</dd></div><div><dt>Drinken vanaf</dt><dd>${b.from||'-'}</dd></div><div><dt>Drinken tot en met</dt><dd>${b.to||'-'}</dd></div>${extra(b)}</dl>
+<p class="note">${noteTxt(b)}</p>${acties(b)}`;
+}
+const wrap=document.getElementById('wrap');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const key=b=>b.r+'-'+b.p;
+const SLOTS=()=>wrap.querySelectorAll('.slot');
+let cur='s2-0',F={q:'',t:'',z:'',s:''},E={q:''};
+function mark(hit,dim){SLOTS().forEach(g=>{g.classList.toggle('hit',!!hit&&hit.has(g.dataset.k));g.classList.toggle('dim',!!dim&&dim.has(g.dataset.k));});}
+function show(t){
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.t===t)));
+  const el=document.getElementById('panel');el.onclick=null;mark();
+  if(t==='zoek')initSearch();else if(t==='eten')initEat();else if(t==='nieuw')initNew();else{panel(cur);el.onclick=e=>{const a=e.target.closest('[data-a]');if(a)act(a.dataset.a,cur);};}
+}
+function pick(k){cur=k;SLOTS().forEach(g=>g.classList.toggle('sel',g.dataset.k===k));show('fles');}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>show(b.dataset.t));
+
+/* Zoeken en filteren */
+const ZONE=r=>r==='x'?'elders':r==='s1'||r==='s2'?'warm':'koud';
+const GROUPS=[
+ ['t','Kleur',[['','Alle'],['rood','Rood'],['wit','Wit'],['rose','Rosé'],['bruis','Bruisend'],['bier','Bier']]],
+ ['z','Zone',[['','Alle'],['warm','Warm (17 °C)'],['koud','Koud (10 °C)'],['elders','Elders']]],
+ ['s','Drinkstatus',[['','Alle'],['ok','Nu drinken'],['wait','Nog bewaren'],['old','Over de top']]]
+];
+const chips=()=>GROUPS.map(([g,l,o])=>`<div class="grp"><span>${l}</span><div class="chs">${o.map(([v,n])=>`<button class="fchip" data-g="${g}" data-v="${v}" aria-pressed="${F[g]===v}">${n}</button>`).join('')}</div></div>`).join('');
+function initSearch(){
+  const el=document.getElementById('panel');
+  el.innerHTML=`<h2>Zoeken</h2><input id="q" class="inp" type="search" placeholder="Naam, producent, druif, regio of gerecht" value="${esc(F.q)}" aria-label="Zoeken in je wijnen">${chips()}<p class="cnt" id="cnt"></p><ul class="res" id="res"></ul>`;
+  el.querySelector('#q').oninput=e=>{F.q=e.target.value;runSearch();};
+  el.onclick=e=>{
+    const c=e.target.closest('.fchip');
+    if(c){F[c.dataset.g]=c.dataset.v;el.querySelectorAll(`.fchip[data-g="${c.dataset.g}"]`).forEach(x=>x.setAttribute('aria-pressed',String(x===c)));runSearch();return;}
+    const r=e.target.closest('.ri');if(r)pick(r.dataset.k);
+  };
+  runSearch();
+}
+function runSearch(){
+  const words=F.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const hay=b=>[b.name,b.prod,b.year,b.grapes,b.region,b.pair,TY[b.t].n].join(' ').toLowerCase();
+  const ok=DATA.filter(b=>words.every(w=>hay(b).includes(w))&&(!F.t||b.t===F.t)&&(!F.z||ZONE(b.r)===F.z)&&(!F.s||status(b)[1]===F.s));
+  document.getElementById('cnt').textContent=`${ok.length} van ${DATA.length} flessen`;
+  document.getElementById('res').innerHTML=ok.map(b=>{const [st,cl]=status(b);return `<li><button class="ri" data-k="${key(b)}"><i style="background:${TY[b.t].f}"></i><span><b>${b.name}</b><small>${b.prod}, ${b.year||'zonder jaartal'}</small></span><em class="chip ${cl}">${st}</em></button></li>`;}).join('')||'<li class="none">Geen wijnen gevonden</li>';
+  const active=words.length||F.t||F.z||F.s;
+  mark(null,active?new Set(DATA.filter(b=>!ok.includes(b)).map(key)):null);
+}
+
+/* Wijnsuggestie bij een gerecht (trefwoorden, prototype) */
+const RULES=[
+ [/\b(vis|zalm|kabeljauw|tonijn|forel|tong|gamba|garnaal|garnalen|schaal|oester|mossel|kreeft|sushi|ceviche|paella)/,{wit:3,bruis:2,rose:2},'past bij vis en schaaldieren'],
+ [/\b(rund|steak|entrecote|biefstuk|lam|wild|hert|stoof|bbq|barbecue|burger|spareribs|worst|gegrild vlees)/,{rood:3},'rood past bij stevig vlees'],
+ [/\b(kip|kalkoen|gevogelte|eend)/,{wit:2,rood:2},'past bij gevogelte'],
+ [/\b(pasta|pizza|lasagne|tomaat|tomaten|italiaans)/,{rood:2,wit:1},'past bij Italiaanse gerechten'],
+ [/\bkaas/,{rood:2,wit:2,bruis:1},'past bij kaas'],
+ [/\b(salade|groente|tapas|asperge)/,{wit:2,rose:2},'fris en licht bij groente en tapas'],
+ [/\b(aperitief|borrel|hapje|hapjes|feest|vieren|toast)/,{bruis:3},'bruisend past bij aperitief of feest'],
+ [/\b(pittig|curry|thai|indisch|chili|pikant|sambal)/,{rose:2,wit:2,bier:2},'verkoelend bij pittig eten',b=>b.taste[0]>=2],
+ [/\b(dessert|toetje|taart|chocola|aardbei|fruit)/,{bruis:2},'bruisend past bij zoet en fruit',b=>b.taste[0]>=2],
+ [/\b(paddenstoel|paddenstoelen|truffel|risotto)/,{rood:2,wit:1},'past bij aardse smaken']
+];
+function suggest(q){
+  q=q.toLowerCase();
+  const toks=[...new Set(q.split(/[^a-zà-ÿ]+/).filter(w=>w.length>=4).map(w=>w.slice(0,4)))];
+  const rules=RULES.filter(r=>r[0].test(q));
+  const all=DATA.map(b=>{
+    let sc=0;const why=[];
+    rules.forEach(([,w,t,f])=>{const v=(w[b.t]||0)+(f&&f(b)?2:0);if(v>0){sc+=v;if(!why.includes(t))why.push(t);}});
+    const h=toks.filter(t=>b.pair.toLowerCase().includes(t)).length;
+    if(h){sc+=Math.min(h*3,6);why.push('staat in de eetsuggesties van deze fles');}
+    const [st,cl]=status(b);
+    if(cl==='wait')sc-=2;else if(cl==='old')sc-=1;else if(Y===b.to)sc+=1;
+    return{b,sc,why,cl};
+  }).filter(x=>x.sc>=3).sort((a,b)=>b.sc-a.sc);
+  const top=all.length?all[0].sc:0;
+  return all.filter(x=>x.sc>=top-3).slice(0,5);
+}
+function initEat(){
+  const el=document.getElementById('panel');
+  el.innerHTML=`<h2>Wat eten we?</h2><p class="sub">Vul in wat je gaat eten. Passende wijnen uit je kast worden omcirkeld.</p><form id="ef" class="eatf"><input id="food" class="inp" type="text" placeholder="Bijvoorbeeld gegrilde zalm met citroen" value="${esc(E.q)}" aria-label="Wat ga je eten"><button class="btn">Zoek wijn</button></form><div class="chs">${['Gegrilde zalm','Stoofpot van rund','Pasta met tomatensaus','Thaise curry','Kaasplank'].map(x=>`<button class="fchip exb">${x}</button>`).join('')}</div><div id="sug"></div><p class="note">Prototype: de suggesties zijn gebaseerd op trefwoorden en de eetsuggesties per fles. De echte app wordt slimmer.</p>`;
+  el.querySelector('#ef').onsubmit=e=>{e.preventDefault();doEat(el.querySelector('#food').value);};
+  el.onclick=e=>{const b=e.target.closest('.exb');if(b){el.querySelector('#food').value=b.textContent;doEat(b.textContent);}};
+  if(E.q)doEat(E.q);
+}
+function doEat(q){
+  E.q=q.trim();
+  const box=document.getElementById('sug');
+  if(!E.q){box.innerHTML='';mark();return;}
+  const res=suggest(E.q);
+  const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+  box.innerHTML=res.length?`<p class="cnt">${res.length===1?'1 wijn past goed':res.length+' wijnen passen goed'}, omcirkeld in de kast</p><ul class="res">${res.map(({b,why,cl})=>`<li class="sg"><i style="background:${TY[b.t].f}"></i><span><b>${b.name}</b><small>${b.prod}, ${b.year||'zonder jaartal'} (${loc(b)})</small><small class="why">${cap(why.slice(0,2).join('; '))}${cl==='ok'&&Y===b.to?'; drink binnenkort':cl==='wait'?'; liever nog even bewaren':cl==='old'?'; voorbij het drinkvenster':''}</small></span></li>`).join('')}</ul>`:'<p class="cnt">Geen duidelijke match in je kast. Omschrijf het gerecht eens anders, bijvoorbeeld met een hoofdingrediënt.</p>';
+  mark(new Set(res.map(r=>key(r.b))));
+}
+wrap.addEventListener('click',e=>{const g=e.target.closest('.slot');if(g)slotClick(g.dataset.k);});
+wrap.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('.slot');if(g){e.preventDefault();slotClick(g.dataset.k);}}});
+
+/* ===== Koppeling met Google Sheets ===== */
+let MODE='demo',CFG={url:API_URL,key:''},PRE=null,MOVE=null,mt;
+try{CFG.url=localStorage.getItem('wk_url')||API_URL;CFG.key=localStorage.getItem('wk_key')||'';}catch(e){}
+const loc=b=>b.r==='x'?b.plaats:LOC[b.r];
+const plaatsStr=(r,p)=>r==='bot'?`bodemruimte, plek ${p+1}`:`plank ${r[1]}, plek ${p+1}`;
+const noteTxt=b=>MODE==='demo'?(b.real?'Gegevens van de producent en wijnhandel. Smaakscores zijn indicatief (vertaald uit proefnotities) en het drinkvenster is een richtlijn.':'Voorbeelddata: dit prototype laat alleen de look en feel zien.'):(b.notes?esc(b.notes):'');
+const acties=b=>MODE==='live'?'<div class="acts"><button class="btn sm" data-a="move">Verplaatsen</button><button class="btn sm ghost" data-a="elders">Naar andere plek</button><button class="btn sm ghost" data-a="drink">Gedronken</button></div>':'';
+const num=v=>v===''||v==null?null:Number(v);
+const vandaag=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+function melding(t,ms=4500){const m=document.getElementById('msg');m.textContent=t;m.style.display='block';clearTimeout(mt);mt=setTimeout(()=>m.style.display='none',ms);}
+async function call(actie,extra){
+  const r=await fetch(CFG.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({key:CFG.key,actie},extra||{}))});
+  const j=await r.json();if(!j.ok)throw new Error(j.fout||'Onbekende fout');return j;
+}
+function fromRow(o){
+  const b={nummer:o.nummer,t:o.type||'rood',name:o.naam,prod:o.producent||'',year:num(o.jaar),taste:['zoet','zuur','body','tannine','fruit'].map(k=>num(o[k])||0),pair:o.eetsuggesties||'',price:num(o.aankoopprijs),bought:o.aankoopdatum||null,from:num(o.drinken_vanaf),to:num(o.drinken_tot),size:o.flesgrootte&&o.flesgrootte!=='standaard'?'dik':undefined,grapes:o.druiven||'',region:o.regio||'',abv:num(o.alcohol),notes:o.notities||''};
+  let m;
+  if(o.plek_soort==='koelkast'&&(m=/plank\s*(\d)\D+(\d+)/i.exec(o.plaats))&&m[1]>=1&&m[1]<=4&&m[2]>=1&&m[2]<=7){b.r='s'+m[1];b.p=m[2]-1;}
+  else if(o.plek_soort==='koelkast'&&(m=/bodem\D*(\d+)/i.exec(o.plaats))&&m[1]>=1&&m[1]<=10){b.r='bot';b.p=m[1]-1;}
+  else{b.r='x';b.p=o.nummer;b.plaats=o.plaats||'Elders';}
+  return b;
+}
+async function laad(){
+  try{
+    let rows;
+    if(CFG.url&&CFG.key){MODE='live';rows=(await call('lijst')).flessen;}
+    else if(CFG.url){MODE='publiek';rows=(await(await fetch(CFG.url+'?actie=publiek')).json()).flessen;if(!rows)throw new Error('Meekijkmodus staat uit');}
+    else throw new Error('');
+    DATA=rows.filter(o=>String(o.status||'aanwezig')==='aanwezig').map(fromRow);
+  }catch(e){
+    if(CFG.url)melding('Kon de sheet niet laden ('+(e.message||'controleer URL en wachtwoord')+'). Voorbeeldflessen getoond.',7000);
+    MODE='demo';DATA=DEMO;
+  }
+}
+function elsHtml(){
+  const g={};DATA.filter(b=>b.r==='x').forEach(b=>(g[b.plaats]=g[b.plaats]||[]).push(b));
+  const ks=Object.keys(g);if(!ks.length)return'';
+  return `<div class="card els"><h3>Buiten de koelkast</h3>${ks.map(k=>`<div class="grp"><span>${esc(k)}</span><div class="chs">${g[k].map(b=>`<button class="slot el" data-k="${key(b)}"><i style="background:${TY[b.t].f}"></i>${esc(b.name)}${b.year?' '+b.year:''}</button>`).join('')}</div></div>`).join('')}</div>`;
+}
+function render(){
+  reindex();
+  wrap.innerHTML=build()+elsHtml();
+  const n=DATA.filter(b=>b.r!=='x').length,e=DATA.length-n;
+  document.getElementById('count').textContent=({live:'Je voorraad',publiek:'Meekijkmodus',demo:'Voorbeeldmodus'})[MODE]+`: ${n} van 38 plekken bezet`+(e?`, ${e} elders`:'');
+}
+async function start(){
+  await laad();render();
+  const f=DATA.find(b=>b.r!=='x');cur=f?key(f):'s2-0';pick(cur);
+}
+function slotClick(k){
+  if(MOVE!=null){
+    if(!BY[k]&&!k.startsWith('x')){doMove(k);}else{MOVE=null;melding('Verplaatsen geannuleerd.');}
+    return;
+  }
+  pick(k);
+}
+async function wijzig(nummer,velden){
+  try{
+    await call('wijzigen',{nummer,velden});await laad();render();
+    const b=DATA.find(x=>String(x.nummer)===String(nummer));if(b)cur=key(b);pick(cur);melding('Opgeslagen.');
+  }catch(e){melding(e.message,7000);}
+}
+async function doMove(k){const [r,p]=k.split('-');const n=MOVE;MOVE=null;await wijzig(n,{plek_soort:'koelkast',plaats:plaatsStr(r,+p)});}
+async function act(a,k){
+  const b=BY[k];
+  if(a==='add'){PRE=k;show('nieuw');return;}
+  if(!b)return;
+  if(a==='move'){MOVE=b.nummer;melding('Klik op een lege plek in de koelkast om de fles te verplaatsen.',8000);}
+  else if(a==='elders'){const n=prompt('Naar welke plek? (bijvoorbeeld Doos bijkeuken)');if(n&&n.trim())await wijzig(b.nummer,{plek_soort:'overig',plaats:n.trim()});}
+  else if(a==='drink'){
+    if(!confirm('Deze fles markeren als gedronken?'))return;
+    const w=prompt('Waardering van 1 tot 5 (leeg laten mag)');
+    const v={status:'gedronken',gedronken_op:vandaag()};if(w&&+w>=1&&+w<=5)v.waardering=+w;
+    await wijzig(b.nummer,v);
+  }
+}
+function initNew(){
+  const el=document.getElementById('panel');
+  if(MODE!=='live'){el.innerHTML='<h2>Fles toevoegen</h2><p class="sub">Toevoegen kan alleen met een werkende verbinding en wachtwoord. Open Instellingen rechtsboven en vul de web-app-URL en je wachtwoord in.</p>';return;}
+  const free=[];for(const r of ['s1','s2','s3','s4','bot'])for(let p=0;p<ROWS[r].n;p++)if(!BY[r+'-'+p])free.push([plaatsStr(r,p),`${LOC[r]}, plek ${p+1}`,r+'-'+p]);
+  const inp=(n,l,t='text',x='',w='')=>`<label class="${w}">${l}<input class="inp" name="${n}" type="${t}" ${x}></label>`;
+  const sel=(n,l,o)=>`<label>${l}<select class="inp" name="${n}">${o.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>`;
+  el.innerHTML=`<h2>Fles toevoegen</h2><form id="nf" class="fm">
+${inp('naam','Naam *','text','required','wide')}${inp('producent','Producent')}${inp('jaar','Jaar','number','min="1800" max="2100"')}
+${sel('type','Soort',[['rood','Rode wijn'],['wit','Witte wijn'],['rose','Rosé'],['bruis','Bruisend'],['bier','Bier']])}${sel('flesgrootte','Fles',[['standaard','Standaard'],['dik','Dik (prosecco, champagne)'],['magnum','Magnum']])}
+${inp('druiven','Druiven')}${inp('regio','Herkomst')}
+${inp('zoet','Zoet (0 tot 5)','number','min="0" max="5"')}${inp('zuur','Zuur (0 tot 5)','number','min="0" max="5"')}${inp('body','Body (0 tot 5)','number','min="0" max="5"')}${inp('tannine','Tannine (0 tot 5)','number','min="0" max="5"')}${inp('fruit','Fruit (0 tot 5)','number','min="0" max="5"')}<span></span>
+${inp('eetsuggesties','Eetsuggesties','text','','wide')}
+${inp('aankoopprijs','Aankoopprijs (€)','number','min="0" step="0.01"')}${inp('aankoopdatum','Aankoopdatum','date')}
+${inp('drinken_vanaf','Drinken vanaf (jaar)','number')}${inp('drinken_tot','Drinken tot (jaar)','number')}
+<label class="wide">Plek<select class="inp" name="plek">${free.map(([v,t,k])=>`<option value="${v}" ${k===PRE?'selected':''}>${t}</option>`).join('')}<option value="overig">Andere plek (naam hieronder)</option></select></label>
+${inp('elders','Naam van de andere plek','text','placeholder="Bijvoorbeeld Doos bijkeuken"','wide')}
+<div class="wide acts"><button class="btn">Toevoegen</button></div></form>`;
+  PRE=null;
+  el.querySelector('#nf').onsubmit=async e=>{
+    e.preventDefault();
+    const f=new FormData(e.target),fles={};
+    ['naam','producent','jaar','type','druiven','regio','flesgrootte','aankoopprijs','aankoopdatum','drinken_vanaf','drinken_tot','zoet','zuur','body','tannine','fruit','eetsuggesties'].forEach(k=>{const v=String(f.get(k)||'').trim();if(v!=='')fles[k]=v;});
+    const pl=f.get('plek');
+    if(pl==='overig'||!pl){const n=String(f.get('elders')||'').trim();if(!n){melding('Vul de naam van de plek in.');return;}fles.plek_soort='overig';fles.plaats=n;}
+    else{fles.plek_soort='koelkast';fles.plaats=pl;}
+    try{
+      const r=await call('toevoegen',{fles});await laad();render();
+      const nb=DATA.find(b=>String(b.nummer)===String(r.fles.nummer));pick(nb?key(nb):cur);melding('Fles toegevoegd.');
+    }catch(err){melding(err.message,7000);}
+  };
+}
+const dlg=document.getElementById('dlg'),cu=document.getElementById('cu'),ck=document.getElementById('ck');
+document.getElementById('cfg').onclick=()=>{cu.value=CFG.url;ck.value=CFG.key;dlg.returnValue='';dlg.showModal();};
+dlg.addEventListener('close',async()=>{
+  const v=dlg.returnValue;
+  if(v==='ok'){CFG.url=cu.value.trim();CFG.key=ck.value;try{localStorage.setItem('wk_url',CFG.url);localStorage.setItem('wk_key',CFG.key);}catch(e){}await start();}
+  else if(v==='wis'){CFG={url:API_URL,key:''};try{localStorage.removeItem('wk_url');localStorage.removeItem('wk_key');}catch(e){}await start();}
+});
+start();
+</script>
+</body>
+</html>
