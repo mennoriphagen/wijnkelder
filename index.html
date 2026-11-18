@@ -89,6 +89,7 @@ select.inp{appearance:auto}
 .el.sel{border-color:var(--brass)}
 .el.hit{border-color:#f0cf8a;box-shadow:0 0 0 2px #f0cf8a}
 .el.dim{opacity:.3}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -111,6 +112,13 @@ select.inp{appearance:auto}
 <label>Web-app-URL<input class="inp" id="cu" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
 <label>Wachtwoord<input class="inp" id="ck" type="password" autocomplete="current-password"></label>
 <div class="eatf"><button class="btn" value="ok">Opslaan en laden</button><button class="btn ghost" value="wis">Wissen</button><button class="btn ghost" value="x">Sluiten</button></div>
+</form></dialog>
+<dialog id="pdlg"><form method="dialog">
+<h2>Naar andere plek</h2>
+<p class="sub" id="pdsub"></p>
+<label>Plek<select class="inp" id="psel"></select></label>
+<label id="pnl">Naam van de nieuwe plek<input class="inp" id="pnew" type="text" placeholder="Bijvoorbeeld Doos bijkeuken"></label>
+<div class="eatf"><button class="btn" value="ok">Verplaatsen</button><button class="btn ghost" value="x">Annuleren</button></div>
 </form></dialog>
 <div id="msg" role="status"></div>
 <script>
@@ -375,7 +383,7 @@ async function act(a,k){
   if(a==='add'){PRE=k;show('nieuw');return;}
   if(!b)return;
   if(a==='move'){MOVE=b.nummer;melding('Klik op een lege plek in de koelkast om de fles te verplaatsen.',8000);}
-  else if(a==='elders'){const n=prompt('Naar welke plek? (bijvoorbeeld Doos bijkeuken)');if(n&&n.trim())await wijzig(b.nummer,{plek_soort:'overig',plaats:n.trim()});}
+  else if(a==='elders')openPlek(b);
   else if(a==='drink'){
     if(!confirm('Deze fles markeren als gedronken?'))return;
     const w=prompt('Waardering van 1 tot 5 (leeg laten mag)');
@@ -389,6 +397,7 @@ function initNew(){
   const free=[];for(const r of ['s1','s2','s3','s4','bot'])for(let p=0;p<ROWS[r].n;p++)if(!BY[r+'-'+p])free.push([plaatsStr(r,p),`${LOC[r]}, plek ${p+1}`,r+'-'+p]);
   const inp=(n,l,t='text',x='',w='')=>`<label class="${w}">${l}<input class="inp" name="${n}" type="${t}" ${x}></label>`;
   const sel=(n,l,o)=>`<label>${l}<select class="inp" name="${n}">${o.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>`;
+  const pls=plekken();
   el.innerHTML=`<h2>Fles toevoegen</h2><form id="nf" class="fm">
 ${inp('naam','Naam *','text','required','wide')}${inp('producent','Producent')}${inp('jaar','Jaar','number','min="1800" max="2100"')}
 ${sel('type','Soort',[['rood','Rode wijn'],['wit','Witte wijn'],['rose','Rosé'],['bruis','Bruisend'],['bier','Bier']])}${sel('flesgrootte','Fles',[['standaard','Standaard'],['dik','Dik (prosecco, champagne)'],['magnum','Magnum']])}
@@ -397,16 +406,19 @@ ${inp('zoet','Zoet (0 tot 5)','number','min="0" max="5"')}${inp('zuur','Zuur (0 
 ${inp('eetsuggesties','Eetsuggesties','text','','wide')}
 ${inp('aankoopprijs','Aankoopprijs (€)','number','min="0" step="0.01"')}${inp('aankoopdatum','Aankoopdatum','date')}
 ${inp('drinken_vanaf','Drinken vanaf (jaar)','number')}${inp('drinken_tot','Drinken tot (jaar)','number')}
-<label class="wide">Plek<select class="inp" name="plek">${free.map(([v,t,k])=>`<option value="${v}" ${k===PRE?'selected':''}>${t}</option>`).join('')}<option value="overig">Andere plek (naam hieronder)</option></select></label>
-${inp('elders','Naam van de andere plek','text','placeholder="Bijvoorbeeld Doos bijkeuken"','wide')}
+<label class="wide">Plek<select class="inp" name="plek">${free.length?`<optgroup label="In de koelkast">${free.map(([v,t,k])=>`<option value="${v}" ${k===PRE?'selected':''}>${t}</option>`).join('')}</optgroup>`:''}${pls.length?`<optgroup label="Buiten de koelkast">${pls.map(p=>`<option value="x:${esc(p)}">${esc(p)}</option>`).join('')}</optgroup>`:''}<option value="overig">Nieuwe plek toevoegen…</option></select></label>
+${inp('elders','Naam van de nieuwe plek','text','placeholder="Bijvoorbeeld Doos bijkeuken"','wide elders')}
 <div class="wide acts"><button class="btn">Toevoegen</button></div></form>`;
   PRE=null;
+  const ps=el.querySelector('select[name=plek]'),el2=el.querySelector('label.elders');
+  const toon=()=>{el2.hidden=ps.value!=='overig';};ps.onchange=toon;toon();
   el.querySelector('#nf').onsubmit=async e=>{
     e.preventDefault();
     const f=new FormData(e.target),fles={};
     ['naam','producent','jaar','type','druiven','regio','flesgrootte','aankoopprijs','aankoopdatum','drinken_vanaf','drinken_tot','zoet','zuur','body','tannine','fruit','eetsuggesties'].forEach(k=>{const v=String(f.get(k)||'').trim();if(v!=='')fles[k]=v;});
     const pl=f.get('plek');
-    if(pl==='overig'||!pl){const n=String(f.get('elders')||'').trim();if(!n){melding('Vul de naam van de plek in.');return;}fles.plek_soort='overig';fles.plaats=n;}
+    if(pl==='overig'||!pl){const n=String(f.get('elders')||'').trim();if(!n){melding('Vul de naam van de nieuwe plek in.');return;}fles.plek_soort='overig';fles.plaats=zelfdePlek(n);}
+    else if(pl.startsWith('x:')){fles.plek_soort='overig';fles.plaats=pl.slice(2);}
     else{fles.plek_soort='koelkast';fles.plaats=pl;}
     try{
       const r=await call('toevoegen',{fles});await laad();render();
@@ -414,6 +426,28 @@ ${inp('elders','Naam van de andere plek','text','placeholder="Bijvoorbeeld Doos 
     }catch(err){melding(err.message,7000);}
   };
 }
+/* Andere plek kiezen of nieuwe plek toevoegen */
+const plekken=()=>[...new Set(DATA.filter(b=>b.r==='x').map(b=>String(b.plaats||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'nl'));
+const zelfdePlek=n=>plekken().find(p=>p.toLowerCase()===n.toLowerCase())||n;
+const pdlg=document.getElementById('pdlg'),psel=document.getElementById('psel'),pnew=document.getElementById('pnew'),pnl=document.getElementById('pnl');
+let PFLES=null;
+psel.onchange=()=>{pnl.hidden=psel.value!=='__nieuw';if(!pnl.hidden)pnew.focus();};
+function openPlek(b){
+  PFLES=b;
+  const nu=b.r==='x'?String(b.plaats).trim():'';
+  const ps=plekken().filter(p=>p!==nu);
+  psel.innerHTML=ps.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('')+'<option value="__nieuw">Nieuwe plek toevoegen…</option>';
+  document.getElementById('pdsub').textContent=`${b.name}${b.year?' '+b.year:''}, nu: ${b.r==='x'?b.plaats:LOC[b.r]+', plek '+(b.p+1)}`;
+  pnew.value='';pnl.hidden=psel.value!=='__nieuw';
+  pdlg.returnValue='';pdlg.showModal();
+}
+pdlg.addEventListener('close',async()=>{
+  const b=PFLES;PFLES=null;
+  if(pdlg.returnValue!=='ok'||!b)return;
+  let n=psel.value;
+  if(n==='__nieuw'){n=pnew.value.trim();if(!n){melding('Vul de naam van de nieuwe plek in.');return;}n=zelfdePlek(n);}
+  await wijzig(b.nummer,{plek_soort:'overig',plaats:n});
+});
 const dlg=document.getElementById('dlg'),cu=document.getElementById('cu'),ck=document.getElementById('ck');
 document.getElementById('cfg').onclick=()=>{cu.value=CFG.url;ck.value=CFG.key;dlg.returnValue='';dlg.showModal();};
 dlg.addEventListener('close',async()=>{
